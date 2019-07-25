@@ -1,0 +1,21 @@
+apply plugin: 'com.fn.tiny'
+
+tinyConfig {
+    //api key 可以配置多个
+    //申请https://tinypng.com/developers，每月免费500张限制
+    apiKey = [
+            "xxxxx",
+            "xxxxx"
+    ]
+    //小文件忽略阈值(单位kb)
+    ignoreThreshold = 4
+    //目标压缩目录
+    resourceDir = [
+            "src/main/res/drawable-hdpi",
+            "src/main/res/drawable-xhdpi",
+            "src/main/res/drawable-xxhdpi",
+            "src/main/res/drawable-xxxhdpi"
+    ]
+    //白名单
+    whiteList = []
+}

@@ -1,0 +1,25 @@
+apply plugin: 'groovy'
+apply plugin: 'maven'
+
+repositories {
+    mavenLocal()
+    jcenter()
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    compile gradleApi()
+    compile 'com.tinify:tinify:1.3.1'
+}
+
+group "com.fn.tiny"
+version "1.0.0"
+
+//当前项目可以发布到本地文件夹中
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: uri('../plugins'))
+        }
+    }
+}
