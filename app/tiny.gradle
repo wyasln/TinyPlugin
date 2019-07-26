@@ -1,8 +1,8 @@
 apply plugin: 'com.fn.tiny'
 
 tinyConfig {
-    //api key 可以配置多个
-    //申请https://tinypng.com/developers，每月免费500张限制
+    //api key 可以配置多个，一个key到达限制张数自动轮换下一个key
+    //申请https://tinypng.com/developers，每个key每月免费500张限制
     apiKey = [
             "xxxxx",
             "xxxxx"
@@ -18,4 +18,6 @@ tinyConfig {
     ]
     //白名单
     whiteList = []
+    //压缩记录文件名
+    logFileName = "tiny_compressed_record.json"
 }
