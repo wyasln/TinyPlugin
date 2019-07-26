@@ -81,14 +81,14 @@ class TinyCompress {
      * @return 压缩结果
      */
     TinyResult compressAllDirectory(File resDir, List<TinyItemInfo> compressedList) {
-        boolean continueNextDirectory = true
+        int taskExecuteStatus = 0
         long beforeTotalSize = 0
         long afterTotalSize = 0
         List<TinyItemInfo> newCompressedList = new ArrayList<>()
         File[] targetFileArray = resDir.listFiles()
         if (targetFileArray == null || targetFileArray.length == 0) {
             println("Empty sources directory >>> ${resDir.absolutePath}")
-            return new TinyResult(beforeTotalSize, afterTotalSize, newCompressedList, continueNextDirectory)
+            return new TinyResult(beforeTotalSize, afterTotalSize, newCompressedList, taskExecuteStatus)
         }
         int fileCount = targetFileArray.length
         loopLabel:
@@ -147,15 +147,24 @@ class TinyCompress {
                         continue loopLabel
                     } else {
                         //没有可用的key退出
-                        continueNextDirectory = false
+                        taskExecuteStatus = -1
                         break
                     }
                 } catch (ClientException e) {
                     println("ClientException: ${e.getMessage()}")
+                    //结束task
+                    taskExecuteStatus = -2
+                    break
                 } catch (ServerException e) {
                     println("ServerException: ${e.getMessage()}")
+                    //结束task
+                    taskExecuteStatus = -3
+                    break
                 } catch (ConnectionException e) {
                     println("ConnectionException: ${e.getMessage()}")
+                    //结束task
+                    taskExecuteStatus = -4
+                    break
                 } catch (IOException e) {
                     println("IOException: ${e.getMessage()}")
                 } catch (Exception e) {
@@ -164,7 +173,7 @@ class TinyCompress {
             }
 
         }
-        return new TinyResult(beforeTotalSize, afterTotalSize, newCompressedList, continueNextDirectory)
+        return new TinyResult(beforeTotalSize, afterTotalSize, newCompressedList, taskExecuteStatus)
     }
 
 }

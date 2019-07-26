@@ -53,7 +53,7 @@ class TinyTask extends DefaultTask {
             }
         } else {
             compressedPicLogFile.createNewFile()
-            println("create compressAllDirectory log file")
+            println("create log file >>> ${logFilePath}")
         }
         def beforeSize = 0L
         def afterSize = 0L
@@ -61,14 +61,14 @@ class TinyTask extends DefaultTask {
         //压缩程序
         TinyCompress tinyCompress = new TinyCompress(project.projectDir.absolutePath, configuration)
 
-        boolean continueNextDirectory = true
+        int preTaskExecuteStatus = 0
         configuration.resourceDir.each { directory ->
             TinyUtils.printLineSeparator(2)
             println("compressing resources dirctory now >>> ${directory}")
             File resourcesDirectory = new File(directory)
-            if (resourcesDirectory.exists() && resourcesDirectory.isDirectory() && continueNextDirectory) {
+            if (resourcesDirectory.exists() && resourcesDirectory.isDirectory() && preTaskExecuteStatus == 0) {
                 TinyResult dirResult = tinyCompress.compressAllDirectory(resourcesDirectory, compressedList)
-                continueNextDirectory = dirResult.continueNextDir
+                preTaskExecuteStatus = dirResult.preTaskStatus
                 beforeSize += dirResult.rawSize
                 afterSize += dirResult.compressedSize
                 if (!dirResult.results.isEmpty()) {
@@ -79,8 +79,21 @@ class TinyTask extends DefaultTask {
                     println("${directory} is not exists!!!Skip this!!!")
                 } else if (!resourcesDirectory.isDirectory()) {
                     println("${directory} is not directory!!!Skip this!!!")
-                } else if (!continueNextDirectory) {
-                    println("No useful api key!!!Skip ${directory}")
+                } else if (!preTaskExecuteStatus) {
+                    switch (preTaskExecuteStatus) {
+                        case -1:
+                            println("No useful key!!! Skip ${directory}")
+                            break
+                        case -2:
+                            println("ClientException!!! Skip ${directory}")
+                            break
+                        case -3:
+                            println("ServerException!!! Skip ${directory}")
+                            break
+                        case -4:
+                            println("ConnectionException!!! Skip ${directory}")
+                            break
+                    }
                 }
             }
         }

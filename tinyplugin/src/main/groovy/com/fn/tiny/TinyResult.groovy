@@ -11,14 +11,14 @@ class TinyResult {
     long rawSize
     long compressedSize
     ArrayList<TinyItemInfo> results
-    //是否进行下一个文件夹的压缩(无可用key时为false)
-    boolean continueNextDir
+    //上一个任务执行状况 0 正常  -1 无可用key  -2 ClientException   -3 ServerException  -4 ConnectionException
+    int preTaskStatus
 
-    TinyResult(long beforeSize, long afterSize, ArrayList<TinyItemInfo> results, boolean continueNext) {
+    TinyResult(long beforeSize, long afterSize, ArrayList<TinyItemInfo> results, int preTaskStatus) {
         this.rawSize = beforeSize
         this.compressedSize = afterSize
         this.results = results
-        this.continueNextDir = continueNext
+        this.preTaskStatus = preTaskStatus
     }
 
 }
