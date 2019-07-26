@@ -121,7 +121,7 @@ class TinyCompress {
                 continue loopLabel
             }
             if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".png")) {
-                println("start compress pic >>> ${file.absolutePath}")
+                println("start compress pic ${i}/${fileCount} >>> ${file.absolutePath}")
                 def fis = new FileInputStream(file)
                 try {
                     def beforeSize = fis.available()
