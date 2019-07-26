@@ -7,8 +7,9 @@ repositories {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
     compile gradleApi()
+    compile localGroovy()
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.tinify:tinify:1.3.1'
 }
 
