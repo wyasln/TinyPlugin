@@ -24,7 +24,7 @@ class TinyTask extends DefaultTask {
         outputs.upToDateWhen { false }
         android = project.extensions.android
         configuration = project.tinyConfig
-        logFilePath = "${project.projectDir}/${TinyConstant.LOG_FILE_NAME}"
+        logFilePath = "${project.projectDir}/${configuration.logFileName}"
     }
 
     @TaskAction

@@ -17,7 +17,7 @@ class TinyConstant {
     //任务配置
     public static final String GRADLE_CONFIG_NAME = "tinyConfig"
     //压缩记录文件名称
-    public static final String LOG_FILE_NAME = "compressed_resource.json"
+    public static final String LOG_FILE_NAME = "tiny_compressed_record.json"
 
     //文件编码
     public static final String UTF8 = "UTF-8"

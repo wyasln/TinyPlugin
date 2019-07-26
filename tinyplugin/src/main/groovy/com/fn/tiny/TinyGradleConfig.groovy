@@ -8,16 +8,18 @@ package com.fn.tiny
  */
 class TinyGradleConfig {
 
-    ArrayList<String> apiKey
-    long ignoreThreshold
-    ArrayList<String> whiteList
-    ArrayList<String> resourceDir
+    public ArrayList<String> apiKey
+    public long ignoreThreshold
+    public ArrayList<String> whiteList
+    public ArrayList<String> resourceDir
+    public String logFileName
 
     TinyGradleConfig() {
         apiKey = []
         ignoreThreshold = 1
         whiteList = []
         resourceDir = []
+        logFileName = TinyConstant.LOG_FILE_NAME
     }
 
     void printConfigInfo() {
@@ -25,6 +27,7 @@ class TinyGradleConfig {
         println("TinyGradleConfig.ignoreThreshold = ${ignoreThreshold}")
         println("TinyGradleConfig.whiteList = ${whiteList}")
         println("TinyGradleConfig.resourceDir = ${resourceDir}")
+        println("TinyGradleConfig.logFileName = ${logFileName}")
         TinyUtils.printLineSeparator(2)
     }
 
