@@ -79,7 +79,7 @@ class TinyTask extends DefaultTask {
                     println("${directory} is not exists!!!Skip this!!!")
                 } else if (!resourcesDirectory.isDirectory()) {
                     println("${directory} is not directory!!!Skip this!!!")
-                } else if (!preTaskExecuteStatus) {
+                } else if (preTaskExecuteStatus != 0) {
                     switch (preTaskExecuteStatus) {
                         case -1:
                             println("No useful key!!! Skip ${directory}")
@@ -92,6 +92,8 @@ class TinyTask extends DefaultTask {
                             break
                         case -4:
                             println("ConnectionException!!! Skip ${directory}")
+                            break
+                        default:
                             break
                     }
                 }
