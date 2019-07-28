@@ -36,7 +36,7 @@ class TaskExecutor {
         for (int i = 0; i < taskSize; i++) {
             TaskItemInfo taskItemInfo = mTaskList.get(i)
             checkThreadPool()
-            println("start compress pic ${i}/${taskSize} >>> ${taskItemInfo.filePath}")
+            println("start compress pic ${(i + 1)}/${taskSize} >>> ${taskItemInfo.filePath}")
             Future<CompressInfoWrapper> future = mExecutorService.submit(new InnerRunner(taskItemInfo))
             try {
                 CompressInfoWrapper infoWrapper = future.get(mTimeout, TimeUnit.SECONDS)
