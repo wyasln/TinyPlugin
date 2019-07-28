@@ -22,4 +22,11 @@ class TinyConstant {
     //文件编码
     public static final String UTF8 = "UTF-8"
 
+    public static final int TASK_NORMAL = 0
+    public static final int TASK_KEY_FAULT = -1
+    public static final int TASK_CLIENT_FAULT = -2
+    public static final int TASK_SERVER_FAULT = -3
+    public static final int TASK_CONNECTION_FAULT = -4
+    public static final int TASK_UNKWON_FAULT = -5
+
 }

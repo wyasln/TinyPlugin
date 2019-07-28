@@ -1,13 +1,23 @@
 apply plugin: 'com.fn.tiny'
 
+//key文件配置
+def keyFile = file("tiny_key.properties")
+def keyProperties = new Properties()
+keyProperties.load(new FileInputStream(keyFile))
+
 tinyConfig {
     //api key 可以配置多个，一个key到达限制张数自动轮换下一个key
     //申请https://tinypng.com/developers，每个key每月免费500张限制
     apiKey = [
-            "xxxxx",
-            "xxxxx"
+            keyProperties['key1'],
+            keyProperties['key2'],
+            keyProperties['key3'],
+            keyProperties['key4'],
+            keyProperties['key5'],
+            keyProperties['key6'],
+            keyProperties['key7']
     ]
-    //小文件忽略阈值(单位kb)
+    //小文件忽略阈值(单位kb,0则不忽略小文件)
     ignoreThreshold = 4
     //目标压缩目录
     resourceDir = [
@@ -18,6 +28,8 @@ tinyConfig {
     ]
     //白名单
     whiteList = []
-    //压缩记录文件名
+    //压缩记录文件名(不配置默认tiny_compressed_record.json)
     logFileName = "tiny_compressed_record.json"
+    //单张图片处理限时(防止任务无限制卡住)
+    timeout = 8
 }

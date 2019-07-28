@@ -13,6 +13,7 @@ class TinyGradleConfig {
     public ArrayList<String> whiteList
     public ArrayList<String> resourceDir
     public String logFileName
+    public long timeout
 
     TinyGradleConfig() {
         apiKey = []
@@ -20,6 +21,7 @@ class TinyGradleConfig {
         whiteList = []
         resourceDir = []
         logFileName = TinyConstant.LOG_FILE_NAME
+        timeout = 60
     }
 
     void printConfigInfo() {
@@ -28,7 +30,8 @@ class TinyGradleConfig {
         println("TinyGradleConfig.whiteList = ${whiteList}")
         println("TinyGradleConfig.resourceDir = ${resourceDir}")
         println("TinyGradleConfig.logFileName = ${logFileName}")
-        TinyUtils.printLineSeparator(2)
+        println("TinyGradleConfig.timeout = ${timeout}")
+        TinyUtils.printLineSeparator()
     }
 
 }

@@ -46,7 +46,7 @@ class TinyUtils {
 
     static void printLineSeparator(int lineCount) {
         for (int i = 0; i < lineCount; i++) {
-            println("~")
+            println(" ")
         }
     }
 
