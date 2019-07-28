@@ -11,6 +11,8 @@ class CompressInfoWrapper {
     public int tinyStatus
     public TinyItemInfo tinyItemInfo
 
-    CompressInfoWrapper() {}
-
+    CompressInfoWrapper(int tinyStatus, TinyItemInfo tinyItemInfo) {
+        this.tinyStatus = tinyStatus
+        this.tinyItemInfo = tinyItemInfo
+    }
 }

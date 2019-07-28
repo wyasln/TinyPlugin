@@ -55,8 +55,11 @@ class TaskExecutor {
                     case TinyConstant.TASK_KEY_FAULT:
                         //已经没有可用的key
                         return new TinyResult(totalRawSize, totalCompressedSize, compressedList, false)
+                    case TinyConstant.TASK_CLIENT_FAULT:
+                        //客户端错误，任务终止
+                        return new TinyResult(totalRawSize, totalCompressedSize, compressedList, false)
                     case TinyConstant.TASK_SERVER_FAULT:
-                        //客户端错误
+                        //服务端错误,任务终止
                         return new TinyResult(totalRawSize, totalCompressedSize, compressedList, false)
                     case TinyConstant.TASK_CONNECTION_FAULT:
                         if (mConnectionRetryCount > 0) {

@@ -52,7 +52,7 @@ class TinyCompress {
         return false
     }
 
-    static CompressInfoWrapper performCompress(TaskItemInfo taskItemInfo) {
+    CompressInfoWrapper performCompress(TaskItemInfo taskItemInfo) {
         File f = new File(taskItemInfo.fileAbsolutePath)
         try {
             FileInputStream fis = new FileInputStream(f)
@@ -65,13 +65,16 @@ class TinyCompress {
             TinyItemInfo info = new TinyItemInfo(f.path, beforeSizeStr, afterSizeStr, TinyUtils.generateFileMD5(f))
             println("compress pic success, rawSize: $beforeSizeStr -> compressedSize: ${afterSizeStr}")
             return new CompressInfoWrapper(TinyConstant.TASK_NORMAL, info)
-        } catch (ClientException e) {
-            println("Tiny ClientException occured while comressing ${taskItemInfo.filePath}")
+        } catch (AccountException e) {
+            println("Tiny AccountException occured while comressing ${taskItemInfo.filePath}")
             if (loopApiKey(false)) {
                 return new CompressInfoWrapper(TinyConstant.TASK_CHANGE_KEY, null)
             } else {
                 return new CompressInfoWrapper(TinyConstant.TASK_KEY_FAULT, null)
             }
+        } catch (ClientException e) {
+            println("Tiny ClientException occured while comressing  ${taskItemInfo.filePath}")
+            return new CompressInfoWrapper(TinyConstant.TASK_CLIENT_FAULT, null)
         } catch (ServerException e) {
             println("Tiny ServerException occured while comressing  ${taskItemInfo.filePath}")
             return new CompressInfoWrapper(TinyConstant.TASK_SERVER_FAULT, null)
