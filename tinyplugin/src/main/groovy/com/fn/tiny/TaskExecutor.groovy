@@ -1,10 +1,6 @@
 package com.fn.tiny
 
 
-import com.tinify.ClientException
-import com.tinify.ConnectionException
-import com.tinify.ServerException
-
 import java.util.concurrent.*
 
 /**
@@ -17,7 +13,8 @@ class TaskExecutor {
 
     private List<TinyItemInfo> mTaskList
 
-    private long mRetryCount = 20
+    private int mTimeoutCount = 20
+    private int mConnectionRetryCount = 20
     private long mTimeout
     private ExecutorService mExecutorService
     private TinyCompress mTinyCompress
@@ -30,7 +27,7 @@ class TaskExecutor {
 
     TinyResult execute() {
         if (mTaskList.isEmpty()) {
-            return new TinyResult(0, 0, new ArrayList<TinyItemInfo>(), TinyConstant.TASK_NORMAL)
+            return new TinyResult(0, 0, new ArrayList<TinyItemInfo>(), true)
         }
         long totalRawSize = 0
         long totalCompressedSize = 0
@@ -39,46 +36,59 @@ class TaskExecutor {
         for (int i = 0; i < taskSize; i++) {
             TaskItemInfo taskItemInfo = mTaskList.get(i)
             checkThreadPool()
-            Future<TinyItemInfo> future = mExecutorService.submit(new InnerRunner(taskItemInfo))
+            Future<CompressInfoWrapper> future = mExecutorService.submit(new InnerRunner(taskItemInfo))
             try {
-                TinyItemInfo tinyItemInfo = future.get(mTimeout, TimeUnit.SECONDS)
-                if (tinyItemInfo != null) {
-                    totalRawSize += tinyItemInfo.rawSize
-                    totalCompressedSize = tinyItemInfo.compressedSize
-                    compressedList.add(tinyItemInfo)
-                } else {
-                    println("could no get result for ${taskItemInfo.filePath}")
+                CompressInfoWrapper infoWrapper = future.get(mTimeout, TimeUnit.SECONDS)
+                switch (infoWrapper.tinyStatus) {
+                    case TinyConstant.TASK_NORMAL:
+                        if (infoWrapper.tinyItemInfo != null) {
+                            totalRawSize += infoWrapper.tinyItemInfo.rawSize
+                            totalCompressedSize = infoWrapper.tinyItemInfo.compressedSize
+                            compressedList.add(infoWrapper.tinyItemInfo)
+                        } else {
+                            println("could no get result for ${taskItemInfo.filePath}")
+                        }
+                        break
+                    case TinyConstant.TASK_CHANGE_KEY:
+                        i--
+                        break
+                    case TinyConstant.TASK_KEY_FAULT:
+                        //已经没有可用的key
+                        return new TinyResult(totalRawSize, totalCompressedSize, compressedList, false)
+                    case TinyConstant.TASK_SERVER_FAULT:
+                        //客户端错误
+                        return new TinyResult(totalRawSize, totalCompressedSize, compressedList, false)
+                    case TinyConstant.TASK_CONNECTION_FAULT:
+                        if (mConnectionRetryCount > 0) {
+                            mConnectionRetryCount--
+                            i--
+                        }
+                        break
+                    case TinyConstant.TASK_IO_FAULT:
+                        break
+                    case TinyConstant.TASK_UNKNOWN_FAULT:
+                        return new TinyResult(totalRawSize, totalCompressedSize, compressedList, true)
                 }
+
             } catch (InterruptedException e) {
                 println("InterruptedException occured while compressing ${i}/${taskSize} ${taskItemInfo.filePath}")
                 mExecutorService.shutdownNow()
             } catch (TimeoutException e) {
                 println("TimeoutException occured while compressing ${i}/${taskSize} ${taskItemInfo.filePath}")
-                mExecutorService.shutdownNow()
-            } catch (ClientException e) {
-                println("ClientException occured while comressing ${i}/${taskSize} ${taskItemInfo.filePath}")
-                if (mTinyCompress.loopApiKey(false) && mRetryCount > 0) {
-                    mRetryCount--
-                    i--
+                if (mTimeoutCount > 0) {
+                    mTimeoutCount--
+                    mExecutorService.shutdownNow()
                 } else {
-                    return new TinyResult(totalRawSize, totalCompressedSize, compressedList, TinyConstant.TASK_CLIENT_FAULT)
+                    return new TinyResult(totalRawSize, totalCompressedSize, compressedList, true)
                 }
-            } catch (ServerException e) {
-                println("ServerException occured while comressing ${i}/${taskSize} ${taskItemInfo.filePath}")
-                return new TinyResult(totalRawSize, totalCompressedSize, compressedList, TinyConstant.TASK_SERVER_FAULT)
-            } catch (ConnectionException e) {
-                println("ConnectionException occured while comressing ${i}/${taskSize} ${taskItemInfo.filePath}")
-                if (mRetryCount > 0) {
-                    mRetryCount--
-                    i--
-                } else {
-                    return new TinyResult(totalRawSize, totalCompressedSize, compressedList, TinyConstant.TASK_CONNECTION_FAULT)
-                }
-            } catch (IOException e) {
-                println("IOException occured while comressing ${i}/${taskSize} ${taskItemInfo.filePath}")
             } catch (Exception e) {
                 println("Exception occured while compressing ${i}/${taskSize} ${taskItemInfo.filePath} \n ${e.printStackTrace()}")
-                mExecutorService.shutdownNow()
+                if (mTimeoutCount > 0) {
+                    mTimeoutCount--
+                    mExecutorService.shutdownNow()
+                } else {
+                    return new TinyResult(totalRawSize, totalCompressedSize, compressedList, true)
+                }
             }
         }
         try {
@@ -86,7 +96,7 @@ class TaskExecutor {
         } catch (Exception e) {
             println("shutdown ExecutorService exception!!!")
         }
-        return new TinyResult(totalRawSize, totalCompressedSize, compressedList, TinyConstant.TASK_NORMAL)
+        return new TinyResult(totalRawSize, totalCompressedSize, compressedList, true)
     }
 
     private void checkThreadPool() {
@@ -98,17 +108,17 @@ class TaskExecutor {
         }
     }
 
-    class InnerRunner implements Callable<TinyItemInfo> {
+    class InnerRunner implements Callable<CompressInfoWrapper> {
 
-        private TaskItemInfo mTaskInfo
+        private TaskItemInfo taskInfo
 
         InnerRunner(TaskItemInfo info) {
-            mTaskInfo = info
+            taskInfo = info
         }
 
         @Override
-        TinyItemInfo call() throws Exception {
-            return mTinyCompress.performCompress(mTaskInfo.fileAbsolutePath)
+        CompressInfoWrapper call() throws Exception {
+            return mTinyCompress.performCompress(taskInfo)
         }
     }
 

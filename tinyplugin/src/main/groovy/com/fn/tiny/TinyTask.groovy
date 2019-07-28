@@ -45,7 +45,7 @@ class TinyTask extends DefaultTask {
         List<TinyItemInfo> compressedList = getCompressedPicList()
         List<TinyResult> taskResultList = new ArrayList<>()
         //遍历图片资源文件夹
-        mGradleConfig.resourceDir.each { directory ->
+        for (String directory : mGradleConfig.resourceDir) {
             TinyUtils.printLineSeparator()
             println("start process directory >>> ${directory}")
             File dir = new File(directory)
@@ -62,6 +62,9 @@ class TinyTask extends DefaultTask {
                 TinyUtils.printLineSeparator()
                 println("task for directory ${directory} completed compress count = ${result.compressedList.size()}!!!")
                 TinyUtils.printLineSeparator()
+                if (!result.continueNext) {
+                    break
+                }
             } else {
                 if (!dir.exists()) {
                     println("${directory} is not exists!!! Skip it!!!")

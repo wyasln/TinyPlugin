@@ -11,16 +11,15 @@ class TinyResult {
     long rawSize
     long compressedSize
     ArrayList<TinyItemInfo> compressedList
-    //上一个任务执行状况 0 正常  -1 无可用key  -2 ClientException   -3 ServerException  -4 ConnectionException
-    int preTaskStatus
+    boolean continueNext
 
     TinyResult() {}
 
-    TinyResult(long beforeSize, long afterSize, List<TinyItemInfo> compressedList, int preTaskStatus) {
+    TinyResult(long beforeSize, long afterSize, List<TinyItemInfo> compressedList, boolean continueNext) {
         this.rawSize = beforeSize
         this.compressedSize = afterSize
         this.compressedList = compressedList
-        this.preTaskStatus = preTaskStatus
+        this.continueNext = continueNext
     }
 
 }

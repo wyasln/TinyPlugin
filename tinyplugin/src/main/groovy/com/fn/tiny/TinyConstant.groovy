@@ -23,10 +23,11 @@ class TinyConstant {
     public static final String UTF8 = "UTF-8"
 
     public static final int TASK_NORMAL = 0
+    public static final int TASK_CHANGE_KEY = 1
     public static final int TASK_KEY_FAULT = -1
-    public static final int TASK_CLIENT_FAULT = -2
-    public static final int TASK_SERVER_FAULT = -3
-    public static final int TASK_CONNECTION_FAULT = -4
-    public static final int TASK_UNKWON_FAULT = -5
+    public static final int TASK_SERVER_FAULT = -2
+    public static final int TASK_CONNECTION_FAULT = -3
+    public static final int TASK_IO_FAULT = -4
+    public static final int TASK_UNKNOWN_FAULT = -5
 
 }

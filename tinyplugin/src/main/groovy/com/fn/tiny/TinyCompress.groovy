@@ -51,43 +51,38 @@ class TinyCompress {
         return false
     }
 
-    static TinyItemInfo performCompress(String absolutePath) {
-        File f = new File(absolutePath)
+    static CompressInfoWrapper performCompress(TaskItemInfo taskItemInfo) {
+        File f = new File(taskItemInfo.fileAbsolutePath)
         try {
             FileInputStream fis = new FileInputStream(f)
             int beforeSize = fis.available()
             String beforeSizeStr = TinyUtils.formatFileSize(beforeSize)
-            Source tSource = Tinify.fromFile(absolutePath)
-            tSource.toFile(absolutePath)
+            Source tSource = Tinify.fromFile(taskItemInfo.fileAbsolutePath)
+            tSource.toFile(taskItemInfo.fileAbsolutePath)
             int afterSize = fis.available()
             String afterSizeStr = TinyUtils.formatFileSize(afterSize)
             TinyItemInfo info = new TinyItemInfo(f.path, beforeSizeStr, afterSizeStr, TinyUtils.generateFileMD5(f))
             println("compress pic success, rawSize: $beforeSizeStr -> compressedSize: ${afterSizeStr}")
-            return info
+            return new CompressInfoWrapper(TinyConstant.TASK_NORMAL, info)
         } catch (ClientException e) {
-            println("ClientException occured while comressing ${i}/${taskSize} ${taskItemInfo.filePath}")
-            if (mTinyCompress.loopApiKey(false) && mRetryCount > 0) {
-                mRetryCount--
-                i--
+            println("Tiny ClientException occured while comressing ${taskItemInfo.filePath}")
+            if (loopApiKey(false)) {
+                return new CompressInfoWrapper(TinyConstant.TASK_CHANGE_KEY, null)
             } else {
-                return new TinyResult(totalRawSize, totalCompressedSize, compressedList, TinyConstant.TASK_CLIENT_FAULT)
+                return new CompressInfoWrapper(TinyConstant.TASK_KEY_FAULT, null)
             }
         } catch (ServerException e) {
-            println("ServerException occured while comressing ${i}/${taskSize} ${taskItemInfo.filePath}")
-            return new TinyResult(totalRawSize, totalCompressedSize, compressedList, TinyConstant.TASK_SERVER_FAULT)
+            println("Tiny ServerException occured while comressing  ${taskItemInfo.filePath}")
+            return new CompressInfoWrapper(TinyConstant.TASK_SERVER_FAULT, null)
         } catch (ConnectionException e) {
-            println("ConnectionException occured while comressing ${i}/${taskSize} ${taskItemInfo.filePath}")
-            if (mRetryCount > 0) {
-                mRetryCount--
-                i--
-            } else {
-                return new TinyResult(totalRawSize, totalCompressedSize, compressedList, TinyConstant.TASK_CONNECTION_FAULT)
-            }
+            println("Tiny ConnectionException occured while comressing ${taskItemInfo.filePath}")
+            return new CompressInfoWrapper(TinyConstant.TASK_CONNECTION_FAULT, null)
         } catch (IOException e) {
-            println("IOException occured while comressing ${i}/${taskSize} ${taskItemInfo.filePath}")
+            println("Tiny IOException occured while comressing ${taskItemInfo.filePath}")
+            return new CompressInfoWrapper(TinyConstant.TASK_IO_FAULT, null)
         } catch (Exception e) {
-            println("Exception occured while compressing ${i}/${taskSize} ${taskItemInfo.filePath} \n ${e.printStackTrace()}")
-            mExecutorService.shutdownNow()
+            println("Tiny Exception occured while compressing ${taskItemInfo.filePath} \n ${e.printStackTrace()}")
+            return new CompressInfoWrapper(TinyConstant.TASK_UNKNOWN_FAULT, null)
         }
     }
 
