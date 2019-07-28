@@ -32,6 +32,7 @@ class TinyCompress {
                     TinyUtils.printLineSeparator()
                 }
                 mCurrentKey = newKey
+                TinyUtils.printLineSeparator()
                 println("API key info ${mCurrentKey} >>> ${Tinify.compressionCount()}/500")
                 return true
             }
