@@ -36,14 +36,15 @@ class TaskExecutor {
         for (int i = 0; i < taskSize; i++) {
             TaskItemInfo taskItemInfo = mTaskList.get(i)
             checkThreadPool()
+            println("start compress pic ${i}/${taskSize} >>> ${taskItemInfo.filePath}")
             Future<CompressInfoWrapper> future = mExecutorService.submit(new InnerRunner(taskItemInfo))
             try {
                 CompressInfoWrapper infoWrapper = future.get(mTimeout, TimeUnit.SECONDS)
                 switch (infoWrapper.tinyStatus) {
                     case TinyConstant.TASK_NORMAL:
                         if (infoWrapper.tinyItemInfo != null) {
-                            totalRawSize += infoWrapper.tinyItemInfo.rawSize
-                            totalCompressedSize = infoWrapper.tinyItemInfo.compressedSize
+                            totalRawSize += infoWrapper.rawSize
+                            totalCompressedSize = infoWrapper.compressedSize
                             compressedList.add(infoWrapper.tinyItemInfo)
                         } else {
                             println("could no get result for ${taskItemInfo.filePath}")

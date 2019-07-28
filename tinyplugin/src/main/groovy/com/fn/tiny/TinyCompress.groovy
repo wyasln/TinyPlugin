@@ -62,9 +62,11 @@ class TinyCompress {
             tSource.toFile(taskItemInfo.fileAbsolutePath)
             int afterSize = fis.available()
             String afterSizeStr = TinyUtils.formatFileSize(afterSize)
-            TinyItemInfo info = new TinyItemInfo(f.path, beforeSizeStr, afterSizeStr, TinyUtils.generateFileMD5(f))
+            TinyItemInfo info = new TinyItemInfo(taskItemInfo.filePath, beforeSizeStr, afterSizeStr, TinyUtils.generateFileMD5(f))
             println("compress pic success, rawSize: $beforeSizeStr -> compressedSize: ${afterSizeStr}")
-            return new CompressInfoWrapper(TinyConstant.TASK_NORMAL, info)
+            CompressInfoWrapper wrapper = new CompressInfoWrapper(TinyConstant.TASK_NORMAL, info)
+            wrapper.setSizeInfo(beforeSize, afterSize)
+            return wrapper
         } catch (AccountException e) {
             println("Tiny AccountException occured while comressing ${taskItemInfo.filePath}")
             if (loopApiKey(false)) {
