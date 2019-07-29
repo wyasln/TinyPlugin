@@ -1,5 +1,4 @@
-package com.fn.tiny;
-
+package com.fn.tiny.bean
 /**
  * CompressInfoWrapper
  * <p>
@@ -9,12 +8,12 @@ package com.fn.tiny;
 class CompressInfoWrapper {
 
     public int tinyStatus
-    public TinyItemInfo tinyItemInfo
+    public CompressedItemInfo tinyItemInfo
 
     public long rawSize
     public long compressedSize
 
-    CompressInfoWrapper(int tinyStatus, TinyItemInfo tinyItemInfo) {
+    CompressInfoWrapper(int tinyStatus, CompressedItemInfo tinyItemInfo) {
         this.tinyStatus = tinyStatus
         this.tinyItemInfo = tinyItemInfo
     }

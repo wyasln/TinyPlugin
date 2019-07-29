@@ -1,5 +1,11 @@
-package com.fn.tiny
+package com.fn.tiny.compress
 
+import com.fn.tiny.TinyConstant
+import com.fn.tiny.plugin.TinyGradleConfig
+import com.fn.tiny.TinyUtils
+import com.fn.tiny.bean.CompressInfoWrapper
+import com.fn.tiny.bean.TaskItemInfo
+import com.fn.tiny.bean.CompressedItemInfo
 import com.tinify.*
 
 import java.lang.Exception
@@ -56,16 +62,15 @@ class TinyCompress {
         File f = new File(taskItemInfo.fileAbsolutePath)
         try {
             FileInputStream fis = new FileInputStream(f)
-            int beforeSize = fis.available()
-            String beforeSizeStr = TinyUtils.formatFileSize(beforeSize)
+            int rawSize = fis.available()
+            String rawSizeStr = TinyUtils.formatFileSize(rawSize)
             Source tSource = Tinify.fromFile(taskItemInfo.fileAbsolutePath)
             tSource.toFile(taskItemInfo.fileAbsolutePath)
-            int afterSize = fis.available()
-            String afterSizeStr = TinyUtils.formatFileSize(afterSize)
-            TinyItemInfo info = new TinyItemInfo(taskItemInfo.filePath, beforeSizeStr, afterSizeStr, TinyUtils.generateFileMD5(f))
-            println("compress pic success, rawSize: $beforeSizeStr -> compressedSize: ${afterSizeStr}")
+            int compressedSize = fis.available()
+            String compressedSizeStr = TinyUtils.formatFileSize(compressedSize)
+            CompressedItemInfo info = new CompressedItemInfo(taskItemInfo.filePath, rawSizeStr, compressedSizeStr, TinyUtils.generateFileMD5(f))
             CompressInfoWrapper wrapper = new CompressInfoWrapper(TinyConstant.TASK_NORMAL, info)
-            wrapper.setSizeInfo(beforeSize, afterSize)
+            wrapper.setSizeInfo(rawSize, compressedSize)
             return wrapper
         } catch (AccountException e) {
             println("Tiny AccountException occured while comressing ${taskItemInfo.filePath}")

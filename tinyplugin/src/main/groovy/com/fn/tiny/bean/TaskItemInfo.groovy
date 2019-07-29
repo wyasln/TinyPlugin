@@ -1,4 +1,4 @@
-package com.fn.tiny
+package com.fn.tiny.bean
 
 /**
  * TaskItemInfo
@@ -14,25 +14,12 @@ class TaskItemInfo {
     public String filePath
     public String fileAbsolutePath
 
-    //是否成功压缩
-    public boolean success
-    //压缩后的大小
-    public long compressedSize
-    //压缩后的文件MD5
-    public String fileMD5
-
     TaskItemInfo(int index, long rawSize, String fileName, String filePath, String fileAbsolutePath) {
         this.index = index
         this.rawSize = rawSize
         this.fileName = fileName
         this.filePath = filePath
         this.fileAbsolutePath = fileAbsolutePath
-    }
-
-    void setCompressInfo(boolean success, long compressedSize, String fileMD5) {
-        this.success = success
-        this.compressedSize = compressedSize
-        this.fileMD5 = fileAbsolutePath
     }
 
     @Override

@@ -1,5 +1,13 @@
-package com.fn.tiny
+package com.fn.tiny.compress
 
+
+import com.fn.tiny.TinyConstant
+import com.fn.tiny.TinyUtils
+import com.fn.tiny.bean.DirectoryItemInfo
+import com.fn.tiny.bean.CompressInfoWrapper
+import com.fn.tiny.bean.FaultInfo
+import com.fn.tiny.bean.TaskItemInfo
+import com.fn.tiny.bean.CompressedItemInfo
 
 import java.util.concurrent.*
 
@@ -11,10 +19,10 @@ import java.util.concurrent.*
  */
 class TaskExecutor {
 
-    private List<TinyItemInfo> mTaskList
+    private List<CompressedItemInfo> mTaskList
 
-    private int mTimeoutCount = 20
-    private int mConnectionRetryCount = 20
+    private int mTimeoutCount = 10
+    private int mConnectionRetryCount = 10
     private long mTimeout
     private ExecutorService mExecutorService
     private TinyCompress mTinyCompress
@@ -25,13 +33,14 @@ class TaskExecutor {
         mTinyCompress = compress
     }
 
-    TinyResult execute() {
-        if (mTaskList.isEmpty()) {
-            return new TinyResult(0, 0, new ArrayList<TinyItemInfo>(), true)
-        }
+    DirectoryItemInfo execute() {
         long totalRawSize = 0
         long totalCompressedSize = 0
-        List<TinyItemInfo> compressedList = new ArrayList<>()
+        List<CompressedItemInfo> compressedList = new ArrayList<>()
+        List<FaultInfo> failedList = new ArrayList<>()
+        if (mTaskList.isEmpty()) {
+            return new DirectoryItemInfo(totalRawSize, totalCompressedSize, compressedList, failedList, true)
+        }
         int taskSize = mTaskList.size()
         for (int i = 0; i < taskSize; i++) {
             TaskItemInfo taskItemInfo = mTaskList.get(i)
@@ -46,52 +55,63 @@ class TaskExecutor {
                             totalRawSize += infoWrapper.rawSize
                             totalCompressedSize = infoWrapper.compressedSize
                             compressedList.add(infoWrapper.tinyItemInfo)
+                            println("compress pic success, rawSize: ${TinyUtils.formatFileSize(infoWrapper.rawSize)} -> compressedSize: ${TinyUtils.formatFileSize(infoWrapper.compressedSize)}")
                         } else {
                             println("could no get result for ${taskItemInfo.filePath}")
+                            failedList.add(new FaultInfo(taskItemInfo.filePath, "could no get result"))
                         }
                         break
                     case TinyConstant.TASK_CHANGE_KEY:
+                        //更换tiny key，重试
                         i--
                         break
                     case TinyConstant.TASK_KEY_FAULT:
-                        //已经没有可用的key
-                        return new TinyResult(totalRawSize, totalCompressedSize, compressedList, false)
+                        //已经没有可用的key,任务终止
+                        return new DirectoryItemInfo(totalRawSize, totalCompressedSize, compressedList, failedList, false)
                     case TinyConstant.TASK_CLIENT_FAULT:
                         //客户端错误，任务终止
-                        return new TinyResult(totalRawSize, totalCompressedSize, compressedList, false)
+                        return new DirectoryItemInfo(totalRawSize, totalCompressedSize, compressedList, failedList, false)
                     case TinyConstant.TASK_SERVER_FAULT:
                         //服务端错误,任务终止
-                        return new TinyResult(totalRawSize, totalCompressedSize, compressedList, false)
+                        return new DirectoryItemInfo(totalRawSize, totalCompressedSize, compressedList, failedList, false)
                     case TinyConstant.TASK_CONNECTION_FAULT:
+                        //连接tiny服务器异常，重试
                         if (mConnectionRetryCount > 0) {
                             mConnectionRetryCount--
                             i--
                         }
                         break
                     case TinyConstant.TASK_IO_FAULT:
+                        //IO异常，记录(可能导致图片损坏),继续下一个
+                        failedList.add(new FaultInfo(taskItemInfo.filePath, "Tiny IOException"))
                         break
                     case TinyConstant.TASK_UNKNOWN_FAULT:
-                        return new TinyResult(totalRawSize, totalCompressedSize, compressedList, true)
+                        //未知异常，继续下一个文件夹
+                        failedList.add(new FaultInfo(taskItemInfo.filePath, "Tiny Unknown fault"))
+                        return new DirectoryItemInfo(totalRawSize, totalCompressedSize, compressedList, failedList, true)
                 }
 
             } catch (InterruptedException e) {
                 println("InterruptedException occured while compressing ${i}/${taskSize} ${taskItemInfo.filePath}")
                 mExecutorService.shutdownNow()
+                failedList.add(new FaultInfo(taskItemInfo.filePath, "ExecutorService InterruptedException"))
             } catch (TimeoutException e) {
+                failedList.add(new FaultInfo(taskItemInfo.filePath, "ExecutorService TimeoutException"))
                 println("TimeoutException occured while compressing ${i}/${taskSize} ${taskItemInfo.filePath}")
                 if (mTimeoutCount > 0) {
                     mTimeoutCount--
                     mExecutorService.shutdownNow()
                 } else {
-                    return new TinyResult(totalRawSize, totalCompressedSize, compressedList, true)
+                    return new DirectoryItemInfo(totalRawSize, totalCompressedSize, compressedList, failedList, true)
                 }
             } catch (Exception e) {
+                failedList.add(new FaultInfo(taskItemInfo.filePath, "ExecutorService Exception"))
                 println("Exception occured while compressing ${i}/${taskSize} ${taskItemInfo.filePath} \n ${e.printStackTrace()}")
                 if (mTimeoutCount > 0) {
                     mTimeoutCount--
                     mExecutorService.shutdownNow()
                 } else {
-                    return new TinyResult(totalRawSize, totalCompressedSize, compressedList, true)
+                    return new DirectoryItemInfo(totalRawSize, totalCompressedSize, compressedList, failedList, true)
                 }
             }
         }
@@ -100,7 +120,7 @@ class TaskExecutor {
         } catch (Exception e) {
             println("shutdown ExecutorService exception!!!")
         }
-        return new TinyResult(totalRawSize, totalCompressedSize, compressedList, true)
+        return new DirectoryItemInfo(totalRawSize, totalCompressedSize, compressedList, failedList, true)
     }
 
     private void checkThreadPool() {

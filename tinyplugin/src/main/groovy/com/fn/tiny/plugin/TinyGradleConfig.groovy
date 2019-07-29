@@ -1,4 +1,7 @@
-package com.fn.tiny
+package com.fn.tiny.plugin
+
+import com.fn.tiny.TinyConstant
+import com.fn.tiny.TinyUtils
 
 /**
  * TinyGradleConfig

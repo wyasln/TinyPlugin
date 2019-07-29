@@ -1,21 +1,21 @@
-package com.fn.tiny
+package com.fn.tiny.bean
 
 /**
- * TinyItemInfo
+ * CompressedItemInfo
  * <p>
  * Author mmmy
  * Date 2019/7/23
  */
-class TinyItemInfo {
+class CompressedItemInfo {
 
     String path
     String rawSize
     String compressedSize
     String md5
 
-    TinyItemInfo() {}
+    CompressedItemInfo() {}
 
-    TinyItemInfo(String path, String preSize, String postSize, String md5) {
+    CompressedItemInfo(String path, String preSize, String postSize, String md5) {
         this.path = path
         this.rawSize = preSize
         this.compressedSize = postSize

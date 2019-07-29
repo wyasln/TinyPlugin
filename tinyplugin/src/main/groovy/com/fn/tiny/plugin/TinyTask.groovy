@@ -1,5 +1,13 @@
-package com.fn.tiny
+package com.fn.tiny.plugin
 
+import com.fn.tiny.TinyConstant
+import com.fn.tiny.bean.DirectoryItemInfo
+import com.fn.tiny.TinyUtils
+import com.fn.tiny.bean.FaultInfo
+import com.fn.tiny.bean.TaskItemInfo
+import com.fn.tiny.bean.CompressedItemInfo
+import com.fn.tiny.compress.TaskExecutor
+import com.fn.tiny.compress.TinyCompress
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.gradle.api.DefaultTask
@@ -15,7 +23,8 @@ class TinyTask extends DefaultTask {
 
     def android
     TinyGradleConfig mGradleConfig
-    String mCompressedLogFile
+    String mCompressedLogFilePath
+    String mFailedLogFilePath
     long mIgnoreFileSize
     long mTimeout
 
@@ -25,7 +34,8 @@ class TinyTask extends DefaultTask {
         outputs.upToDateWhen { false }
         android = project.extensions.android
         mGradleConfig = project.tinyConfig
-        mCompressedLogFile = "${project.projectDir}/${mGradleConfig.logFileName}"
+        mCompressedLogFilePath = "${project.projectDir}${File.separator}${mGradleConfig.logFileName}"
+        mFailedLogFilePath = "${project.projectDir}${File.separator}build${File.separator}tinylog${File.separator}${TinyConstant.FAIL_LOG_FILE_NAME}"
         mIgnoreFileSize = mGradleConfig.ignoreThreshold * 1024
         mTimeout = mGradleConfig.timeout
     }
@@ -42,8 +52,9 @@ class TinyTask extends DefaultTask {
             return
         }
         TinyCompress tinyCompress = new TinyCompress(mGradleConfig)
-        List<TinyItemInfo> compressedList = getCompressedPicList()
-        List<TinyResult> taskResultList = new ArrayList<>()
+        //已经压缩过的图片记录
+        List<CompressedItemInfo> compressedList = getCompressedPicList()
+        List<DirectoryItemInfo> taskResultList = new ArrayList<>()
         //遍历图片资源文件夹
         for (String directory : mGradleConfig.resourceDir) {
             TinyUtils.printLineSeparator()
@@ -52,15 +63,19 @@ class TinyTask extends DefaultTask {
             if (dir.exists() && dir.isDirectory()) {
                 //生成待压缩集合
                 List<TaskItemInfo> taskList = generateTaskListForDirectory(dir, compressedList)
+                if (taskList.isEmpty()) {
+                    println("${directory} is with no need for compress , so skip it")
+                    continue
+                }
                 println("task list size =  ${taskList.size()} >>> ${directory}")
                 TinyUtils.printLineSeparator()
                 println("compress task for directory ${directory} start now!!!")
                 TinyUtils.printLineSeparator()
                 TaskExecutor executor = new TaskExecutor(taskList, mTimeout, tinyCompress)
-                TinyResult result = executor.execute()
+                DirectoryItemInfo result = executor.execute()
                 taskResultList.add(result)
                 TinyUtils.printLineSeparator()
-                println("task for directory ${directory} completed compress count ${result.compressedList.size()}/${taskList.size()}!!!")
+                println("task for directory ${directory} completed , compress count ${result.compressedList.size()}/${taskList.size()}!!!")
                 TinyUtils.printLineSeparator()
                 if (!result.continueNext) {
                     break
@@ -78,7 +93,7 @@ class TinyTask extends DefaultTask {
         handleResult(compressedList, taskResultList)
     }
 
-    List<TaskItemInfo> generateTaskListForDirectory(File directory, List<TinyItemInfo> compressedList) {
+    List<TaskItemInfo> generateTaskListForDirectory(File directory, List<CompressedItemInfo> compressedList) {
         List<TaskItemInfo> taskList = new ArrayList<>()
         File[] files = directory.listFiles()
         if (files != null && files.length > 0) {
@@ -105,7 +120,7 @@ class TinyTask extends DefaultTask {
                     }
                 }
                 //已压缩过滤
-                for (TinyItemInfo info : compressedList) {
+                for (CompressedItemInfo info : compressedList) {
                     if (f.path == info.path && TinyUtils.generateFileMD5(f) == info.md5) {
                         println("pic has already been compressed, skip it>>> ${f.path}")
                         continue loopLabel
@@ -124,9 +139,9 @@ class TinyTask extends DefaultTask {
         return taskList
     }
 
-    List<TinyItemInfo> getCompressedPicList() {
-        List<TinyItemInfo> compressedList = new ArrayList<>()
-        File compressedPicLogFile = new File(mCompressedLogFile)
+    List<CompressedItemInfo> getCompressedPicList() {
+        List<CompressedItemInfo> compressedList = new ArrayList<>()
+        File compressedPicLogFile = new File(mCompressedLogFilePath)
         if (compressedPicLogFile.exists()) {
             try {
                 def parsedList = new JsonSlurper().parse(compressedPicLogFile, TinyConstant.UTF8)
@@ -142,19 +157,22 @@ class TinyTask extends DefaultTask {
         return compressedList
     }
 
-    void handleResult(List<TinyItemInfo> compressedList, List<TinyResult> resultList) {
-        List<TinyItemInfo> newCompressedList = new ArrayList<>()
+    void handleResult(List<CompressedItemInfo> compressedList, List<DirectoryItemInfo> resultList) {
+        List<CompressedItemInfo> newCompressedList = new ArrayList<>()
+        List<FaultInfo> faultItemList = new ArrayList<>()
         long beforeSize = 0
         long afterSize = 0
         if (resultList) {
-            for (TinyResult r : resultList) {
+            for (DirectoryItemInfo r : resultList) {
                 beforeSize += r.rawSize
                 afterSize += r.compressedSize
                 newCompressedList.addAll(r.compressedList)
+                faultItemList.addAll(r.failedList)
             }
         }
+        //写入压缩记录文件
         if (newCompressedList) {
-            for (TinyItemInfo info : newCompressedList) {
+            for (CompressedItemInfo info : newCompressedList) {
                 int index = compressedList.path.indexOf(info.path)
                 if (index >= 0) {
                     compressedList[index] = info
@@ -164,15 +182,30 @@ class TinyTask extends DefaultTask {
             }
             JsonOutput jsonOutput = new JsonOutput()
             String json = jsonOutput.toJson(compressedList)
-            File logFile = new File(mCompressedLogFile)
+            File logFile = new File(mCompressedLogFilePath)
             if (!logFile.exists()) {
                 logFile.createNewFile()
             }
             logFile.write(jsonOutput.prettyPrint(json), TinyConstant.UTF8)
-            TinyUtils.printLineSeparator(4)
-            println("All task completed, compressAllDirectory file count = ${newCompressedList.size()}, before total size = ${TinyUtils.formatFileSize(beforeSize)} after total size = ${TinyUtils.formatFileSize(afterSize)}")
+        }
+        //写入错误记录文件
+        if (faultItemList) {
+            File failLogFile = new File(mFailedLogFilePath)
+            if (failLogFile.exists()) {
+                failLogFile.delete()
+            }
+            failLogFile.createNewFile()
+            JsonOutput jsonOutput = new JsonOutput()
+            String json = jsonOutput.toJson(faultItemList)
+            failLogFile.write(jsonOutput.prettyPrint(json), TinyConstant.UTF8)
         }
 
+        TinyUtils.printLineSeparator(2)
+        println("-------------------------------  All task completed  -------------------------------")
+        println("directory count = ${mGradleConfig.resourceDir.size()}")
+        println("compress success pic count = ${newCompressedList.size()}")
+        println("compress fail pic count = ${faultItemList.size()}")
+        println("before total size = ${TinyUtils.formatFileSize(beforeSize)} , after total size = ${TinyUtils.formatFileSize(afterSize)}")
     }
 
 }

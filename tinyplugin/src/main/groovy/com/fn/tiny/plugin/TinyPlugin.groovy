@@ -1,5 +1,6 @@
-package com.fn.tiny
+package com.fn.tiny.plugin
 
+import com.fn.tiny.TinyConstant
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
