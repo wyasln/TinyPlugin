@@ -194,9 +194,10 @@ class TinyTask extends DefaultTask {
             File failLogDir = new File(mFailedLogFileDirPath)
             failLogDir.mkdirs()
             File logFile = new File(failLogDir, TinyConstant.FAIL_LOG_FILE_NAME)
-            if (!logFile.exists()) {
-                logFile.createNewFile()
+            if (logFile.exists()) {
+                logFile.delete()
             }
+            logFile.createNewFile()
             JsonOutput jsonOutput = new JsonOutput()
             String json = jsonOutput.toJson(faultItemList)
             logFile.write(jsonOutput.prettyPrint(json), TinyConstant.UTF8)

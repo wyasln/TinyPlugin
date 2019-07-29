@@ -31,5 +31,5 @@ tinyConfig {
     //压缩记录文件名(不配置默认tiny_compressed_record.json)
     logFileName = "tiny_compressed_record.json"
     //单张图片处理限时(防止任务无限制卡住)
-    timeout = 5
+    timeout = 20
 }
