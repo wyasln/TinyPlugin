@@ -187,6 +187,7 @@ class TinyTask extends DefaultTask {
                 logFile.createNewFile()
             }
             logFile.write(jsonOutput.prettyPrint(json), TinyConstant.UTF8)
+            println("write compressed record log file >>> ${mCompressedLogFilePath}")
         }
         //写入错误记录文件
         if (faultItemList) {
@@ -194,10 +195,12 @@ class TinyTask extends DefaultTask {
             if (failLogFile.exists()) {
                 failLogFile.delete()
             }
+            failLogFile.mkdirs()
             failLogFile.createNewFile()
             JsonOutput jsonOutput = new JsonOutput()
             String json = jsonOutput.toJson(faultItemList)
             failLogFile.write(jsonOutput.prettyPrint(json), TinyConstant.UTF8)
+            println("write compress fail log  file >>> ${mFailedLogFilePath}")
         }
 
         TinyUtils.printLineSeparator(2)

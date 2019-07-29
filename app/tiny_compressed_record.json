@@ -1,38 +1,74 @@
 [
     {
-        "rawSize": "125.51KB",
+        "rawSize": "1.41MB",
+        "md5": "c7696f848e079f3c437d823b32088283",
+        "compressedSize": "241.71KB",
+        "path": "src\\main\\res\\drawable-xxxhdpi\\pic_005.jpeg"
+    },
+    {
+        "rawSize": "702.91KB",
+        "md5": "3e2e9714e4bf2912048953e243b19f77",
+        "compressedSize": "96.14KB",
+        "path": "src\\main\\res\\drawable-xxhdpi\\pic_006.jpg"
+    },
+    {
+        "rawSize": "1.41MB",
+        "md5": "c7696f848e079f3c437d823b32088283",
+        "compressedSize": "241.71KB",
+        "path": "src\\main\\res\\drawable-xxhdpi\\pic_005.jpeg"
+    },
+    {
+        "rawSize": "125.46KB",
         "md5": "7f97c48bb509507fed6ad8ad9c0f30c3",
         "compressedSize": "125.46KB",
         "path": "src\\main\\res\\drawable-xxhdpi\\pic002.jpeg"
     },
     {
-        "rawSize": "45.84KB",
-        "md5": "f21f023e990ae9883e820492d4c44f16",
-        "compressedSize": "45.75KB",
+        "rawSize": "702.91KB",
+        "md5": "3e2e9714e4bf2912048953e243b19f77",
+        "compressedSize": "96.14KB",
+        "path": "src\\main\\res\\drawable-xxxhdpi\\pic_006.jpg"
+    },
+    {
+        "rawSize": "138.62KB",
+        "md5": "d7e7449dc9d6bafb2765485da14977ce",
+        "compressedSize": "88.54KB",
+        "path": "src\\main\\res\\drawable-xxxhdpi\\pic_004.jpg"
+    },
+    {
+        "rawSize": "45.75KB",
+        "md5": "bbaddf0a1b53d92e17832b64a9001444",
+        "compressedSize": "45.56KB",
         "path": "src\\main\\res\\drawable-xxxhdpi\\pic003.jpg"
     },
     {
-        "rawSize": "125.51KB",
+        "rawSize": "125.46KB",
         "md5": "7f97c48bb509507fed6ad8ad9c0f30c3",
         "compressedSize": "125.46KB",
         "path": "src\\main\\res\\drawable-xxxhdpi\\pic002.jpeg"
     },
     {
-        "rawSize": "47.59KB",
-        "md5": "8a8f4c11e383571dea54ac75e1f321ff",
-        "compressedSize": "46.26KB",
+        "rawSize": "46.26KB",
+        "md5": "888a795d41e2bb3f44202a879c9c1cf5",
+        "compressedSize": "45.80KB",
         "path": "src\\main\\res\\drawable-xxxhdpi\\pic001.jpg"
     },
     {
-        "rawSize": "45.84KB",
-        "md5": "f21f023e990ae9883e820492d4c44f16",
-        "compressedSize": "45.75KB",
+        "rawSize": "138.62KB",
+        "md5": "d7e7449dc9d6bafb2765485da14977ce",
+        "compressedSize": "88.54KB",
+        "path": "src\\main\\res\\drawable-xxhdpi\\pic_004.jpg"
+    },
+    {
+        "rawSize": "45.75KB",
+        "md5": "bbaddf0a1b53d92e17832b64a9001444",
+        "compressedSize": "45.56KB",
         "path": "src\\main\\res\\drawable-xxhdpi\\pic003.jpg"
     },
     {
-        "rawSize": "47.59KB",
-        "md5": "8a8f4c11e383571dea54ac75e1f321ff",
-        "compressedSize": "46.26KB",
+        "rawSize": "46.26KB",
+        "md5": "888a795d41e2bb3f44202a879c9c1cf5",
+        "compressedSize": "45.80KB",
         "path": "src\\main\\res\\drawable-xxhdpi\\pic001.jpg"
     }
 ]
