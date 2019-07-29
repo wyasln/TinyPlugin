@@ -53,7 +53,7 @@ class TaskExecutor {
                     case TinyConstant.TASK_NORMAL:
                         if (infoWrapper.tinyItemInfo != null) {
                             totalRawSize += infoWrapper.rawSize
-                            totalCompressedSize = infoWrapper.compressedSize
+                            totalCompressedSize += infoWrapper.compressedSize
                             compressedList.add(infoWrapper.tinyItemInfo)
                             println("compress pic success, rawSize: ${TinyUtils.formatFileSize(infoWrapper.rawSize)} -> compressedSize: ${TinyUtils.formatFileSize(infoWrapper.compressedSize)}")
                         } else {
