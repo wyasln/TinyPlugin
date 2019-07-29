@@ -8,8 +8,10 @@ package com.fn.tiny.bean;
  */
 class FaultInfo {
 
-    public String path
-    public String errorMessage
+    String path
+    String errorMessage
+
+    FaultInfo() {}
 
     FaultInfo(String path, String errorMessage) {
         this.path = path
