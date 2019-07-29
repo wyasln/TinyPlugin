@@ -76,6 +76,7 @@ class TaskExecutor {
                         return new DirectoryItemInfo(totalRawSize, totalCompressedSize, compressedList, failedList, false)
                     case TinyConstant.TASK_CONNECTION_FAULT:
                         //连接tiny服务器异常，重试
+                        println("connection retry count = ${mConnectionRetryCount}")
                         if (mConnectionRetryCount > 0) {
                             mConnectionRetryCount--
                             i--
@@ -99,6 +100,7 @@ class TaskExecutor {
             } catch (TimeoutException e) {
                 failedList.add(new FaultInfo(taskItemInfo.filePath, "ExecutorService TimeoutException"))
                 println("TimeoutException occured while compressing ${i}/${taskSize} ${taskItemInfo.filePath}")
+                println("ExecutorService timeout count = ${mTimeoutCount}")
                 if (mTimeoutCount > 0) {
                     mTimeoutCount--
                     mExecutorService.shutdownNow()
