@@ -138,9 +138,6 @@ class TinyTask extends DefaultTask {
             } catch (Exception ignored) {
                 println("log file is invalid")
             }
-        } else {
-            compressedPicLogFile.createNewFile()
-            println("create log file >>> ${mCompressedLogFile}")
         }
         return compressedList
     }
@@ -168,6 +165,9 @@ class TinyTask extends DefaultTask {
             JsonOutput jsonOutput = new JsonOutput()
             String json = jsonOutput.toJson(compressedList)
             File logFile = new File(mCompressedLogFile)
+            if (!logFile.exists()) {
+                logFile.createNewFile()
+            }
             logFile.write(jsonOutput.prettyPrint(json), TinyConstant.UTF8)
             TinyUtils.printLineSeparator(4)
             println("All task completed, compressAllDirectory file count = ${newCompressedList.size()}, before total size = ${TinyUtils.formatFileSize(beforeSize)} after total size = ${TinyUtils.formatFileSize(afterSize)}")
