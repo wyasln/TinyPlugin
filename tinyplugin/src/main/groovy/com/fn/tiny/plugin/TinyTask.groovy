@@ -24,7 +24,7 @@ class TinyTask extends DefaultTask {
     def android
     TinyGradleConfig mGradleConfig
     String mCompressedLogFilePath
-    String mFailedLogFilePath
+    String mFailedLogFileDirPath
     long mIgnoreFileSize
     long mTimeout
 
@@ -35,7 +35,7 @@ class TinyTask extends DefaultTask {
         android = project.extensions.android
         mGradleConfig = project.tinyConfig
         mCompressedLogFilePath = "${project.projectDir}${File.separator}${mGradleConfig.logFileName}"
-        mFailedLogFilePath = "${project.projectDir}${File.separator}build${File.separator}tinylog${File.separator}${TinyConstant.FAIL_LOG_FILE_NAME}"
+        mFailedLogFileDirPath = "${project.projectDir}${File.separator}build${File.separator}${TinyConstant.FAIL_LOG_FILE_DIR}"
         mIgnoreFileSize = mGradleConfig.ignoreThreshold * 1024
         mTimeout = mGradleConfig.timeout
     }
@@ -191,16 +191,16 @@ class TinyTask extends DefaultTask {
         }
         //写入错误记录文件
         if (faultItemList) {
-            File failLogFile = new File(mFailedLogFilePath)
-            if (failLogFile.exists()) {
-                failLogFile.delete()
+            File failLogDir = new File(mFailedLogFileDirPath)
+            failLogDir.mkdirs()
+            File logFile = new File(failLogDir, TinyConstant.FAIL_LOG_FILE_NAME)
+            if (!logFile.exists()) {
+                logFile.createNewFile()
             }
-            failLogFile.mkdirs()
-            failLogFile.createNewFile()
             JsonOutput jsonOutput = new JsonOutput()
             String json = jsonOutput.toJson(faultItemList)
-            failLogFile.write(jsonOutput.prettyPrint(json), TinyConstant.UTF8)
-            println("write compress fail log  file >>> ${mFailedLogFilePath}")
+            logFile.write(jsonOutput.prettyPrint(json), TinyConstant.UTF8)
+            println("write compress fail log  file >>> ${mFailedLogFileDirPath}")
         }
 
         TinyUtils.printLineSeparator(2)
