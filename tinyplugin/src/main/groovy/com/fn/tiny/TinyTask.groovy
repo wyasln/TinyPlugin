@@ -60,7 +60,7 @@ class TinyTask extends DefaultTask {
                 TinyResult result = executor.execute()
                 taskResultList.add(result)
                 TinyUtils.printLineSeparator()
-                println("task for directory ${directory} completed compress count = ${result.compressedList.size()}!!!")
+                println("task for directory ${directory} completed compress count ${result.compressedList.size()}/${taskList.size()}!!!")
                 TinyUtils.printLineSeparator()
                 if (!result.continueNext) {
                     break
