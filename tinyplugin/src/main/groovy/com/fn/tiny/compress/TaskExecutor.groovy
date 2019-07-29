@@ -80,6 +80,7 @@ class TaskExecutor {
                             mConnectionRetryCount--
                             i--
                         }
+                        mExecutorService.shutdownNow()
                         break
                     case TinyConstant.TASK_IO_FAULT:
                         //IO异常，记录(可能导致图片损坏),继续下一个
